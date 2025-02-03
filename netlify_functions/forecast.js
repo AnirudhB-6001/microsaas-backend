@@ -1,4 +1,15 @@
 exports.handler = async (event, context) => {
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+        };
+    }
+
     if (event.httpMethod === 'POST') {
         try {
             const body = JSON.parse(event.body);
@@ -11,39 +22,54 @@ exports.handler = async (event, context) => {
                 growthRates.push(growth);
             }
 
-            const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
-            const totalSales = quarterlySales.reduce((a, b) => a + b, 0);
+            const avgGrowthRate = growthRates.reduce((sum, rate) => sum + rate, 0) / growthRates.length;
+            const totalSales = quarterlySales.reduce((sum, sale) => sum + sale, 0);
             const avgQuarterlySales = totalSales / 4;
 
-            // Project next year's sales
-            let nextQuarter = quarterlySales[3] * (1 + avgGrowthRate / 100);
-            const projectedQuarters = [nextQuarter];
-            for (let i = 1; i < 4; i++) {
-                nextQuarter *= (1 + avgGrowthRate / 100);
-                projectedQuarters.push(nextQuarter);
+            const forecastedSales = quarterlySales[3] * (1 + avgGrowthRate / 100);
+            const projectedQuarters = [];
+            let currentQuarterSales = forecastedSales;
+            for (let i = 0; i < 4; i++) {
+                currentQuarterSales *= (1 + avgGrowthRate / 100);
+                projectedQuarters.push(currentQuarterSales);
             }
 
-            const totalForecastedSales = projectedQuarters.reduce((a, b) => a + b, 0);
+            const totalForecastedSales = projectedQuarters.reduce((sum, sale) => sum + sale, 0);
 
             return {
                 statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
                 body: JSON.stringify({
                     avgGrowthRate: avgGrowthRate.toFixed(2),
                     totalSales: totalSales.toFixed(2),
                     avgQuarterlySales: avgQuarterlySales.toFixed(2),
-                    projectedQuarters: projectedQuarters.map(q => q.toFixed(2)),
+                    projectedQuarters: projectedQuarters.map((q) => q.toFixed(2)),
                     totalForecastedSales: totalForecastedSales.toFixed(2),
                 }),
             };
         } catch (error) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
                 body: JSON.stringify({ error: 'Invalid input data' }),
             };
         }
     } else {
         return {
             statusCode: 405,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
             body: JSON.stringify({ error: 'Method Not Allowed' }),
         };
     }
