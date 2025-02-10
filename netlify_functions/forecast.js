@@ -1,11 +1,9 @@
 exports.handler = async (event, context) => {
-    const ALLOWED_ORIGIN = 'https://tool.anirudhbatraofficial.com'; // Define allowed origin once
-
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
             headers: {
-                'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
             },
@@ -17,7 +15,6 @@ exports.handler = async (event, context) => {
             const body = JSON.parse(event.body);
             const { q1, q2, q3, q4 } = body;
 
-            // Perform calculations
             const quarterlySales = [q1, q2, q3, q4].map(Number);
             const growthRates = [];
             for (let i = 1; i < quarterlySales.length; i++) {
@@ -29,8 +26,9 @@ exports.handler = async (event, context) => {
             const totalSales = quarterlySales.reduce((sum, sale) => sum + sale, 0);
             const avgQuarterlySales = totalSales / 4;
 
-            let currentQuarterSales = quarterlySales[3] * (1 + avgGrowthRate / 100);
+            const forecastedSales = quarterlySales[3] * (1 + avgGrowthRate / 100);
             const projectedQuarters = [];
+            let currentQuarterSales = forecastedSales;
             for (let i = 0; i < 4; i++) {
                 currentQuarterSales *= (1 + avgGrowthRate / 100);
                 projectedQuarters.push(currentQuarterSales);
@@ -41,7 +39,7 @@ exports.handler = async (event, context) => {
             return {
                 statusCode: 200,
                 headers: {
-                    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+                    'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'POST, OPTIONS',
                     'Access-Control-Allow-Headers': 'Content-Type',
                 },
@@ -57,7 +55,7 @@ exports.handler = async (event, context) => {
             return {
                 statusCode: 400,
                 headers: {
-                    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+                    'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'POST, OPTIONS',
                     'Access-Control-Allow-Headers': 'Content-Type',
                 },
@@ -68,7 +66,7 @@ exports.handler = async (event, context) => {
         return {
             statusCode: 405,
             headers: {
-                'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
             },
